@@ -1,17 +1,55 @@
-version: "3.8"
-
 services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    networks:
+      - appnet
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - appnet
+
   web:
     build: .
     container_name: fastapi-ocr
     ports:
       - "8000:8000"
-    env_file:
-      - .env
-    command: uvicorn main:app --host 0.0.0.0 --port 8000
     volumes:
       - .:/app
+    depends_on:
+      - rabbitmq
+      - redis
+    env_file:
+      - .env
     working_dir: /app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+    networks:
+      - appnet
+
+  worker:
+    build: .
+    container_name: celery-worker
+    command: celery -A celery_worker.celery_app worker --loglevel=info -Q analysis
+    depends_on:
+      - rabbitmq
+      - redis
+    env_file:
+      - .env
+    networks:
+      - appnet
 
 volumes:
-  postgres_data:
+  sqlite:
+    driver: local
+
+networks:
+  appnet:
+    driver: bridge

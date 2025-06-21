@@ -1,6 +1,5 @@
 import os
 from uuid import uuid4
-import uvicorn
 from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from fastapi.responses import FileResponse
