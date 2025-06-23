@@ -20,7 +20,14 @@ class DocumentText(BaseModel):
 class DocumentCreate(Document):
     text: str
 
+class DocumentOut(BaseModel):
+    id: int
+    path: str
+    date: datetime | None
+    text: str
 
+    class Config:
+        orm_mode = True
 
 
 

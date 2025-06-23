@@ -1,7 +1,7 @@
 import os
 from uuid import uuid4
 from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from fastapi.responses import FileResponse
 
 from database import SessionLocal, engine, Base
@@ -36,14 +36,19 @@ def create_document(doc_in: schemas.DocumentCreate, db: Session = Depends(get_db
 
     return db_doc
 
-@app.get('/documents/{doc_id}/', response_model=schemas.Document,
-         summary='Получение документа по индексу', tags=['Документы'])
-def get_doc(doc_id: int, db:Session = Depends(get_db)):
-    db_p = db.query(Document).where(Document.id==doc_id).first()
-    if not db_p:
+@app.get('/documents/{doc_id}/', response_model=schemas.DocumentOut,
+    summary='Получение документа по индексу', tags=['Документы']
+)
+def get_doc(doc_id: int, db: Session = Depends(get_db)):
+    doc = (
+        db.query(Document)
+          .options(selectinload(Document._text_obj))
+          .filter(Document.id == doc_id)
+          .first()
+    )
+    if not doc:
         raise HTTPException(status_code=404, detail='Документ не найден')
-    else:
-        return db_p
+    return doc
 
 
 @app.post('/upload_doc', response_model=schemas.Document,

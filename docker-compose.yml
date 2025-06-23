@@ -24,6 +24,7 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
+      - ./fastapi.db:/app/fastapi.db
     depends_on:
       - rabbitmq
       - redis
@@ -43,12 +44,11 @@ services:
       - redis
     env_file:
       - .env
+    volumes:
+        - .:/app
+        - ./fastapi.db:/app/fastapi.db
     networks:
-      - appnet
-
-volumes:
-  sqlite:
-    driver: local
+        - appnet
 
 networks:
   appnet:
