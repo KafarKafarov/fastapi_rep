@@ -11,8 +11,10 @@ from tasks import analyse_doc
 
 UPLOAD_DIR = 'documents'
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+'''
 Base.metadata.drop_all(bind=engine)
 Base.metadata.create_all(bind=engine)
+'''
 app = FastAPI()
 
 def get_db():
