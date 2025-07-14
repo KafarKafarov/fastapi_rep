@@ -1,13 +1,15 @@
+from datetime import datetime
 from database import Base
-from sqlalchemy import String, Integer, ForeignKey, Column, DateTime, func, Text
-from sqlalchemy.orm import relationship
+from sqlalchemy import ForeignKey, DateTime, func
+from sqlalchemy.orm import relationship, Mapped, mapped_column
+from typing import Optional
 
 class Document(Base):
     __tablename__ = 'documents'
 
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    path = Column(String, nullable=False)
-    date = Column(DateTime(timezone=True), server_default=func.now())
+    id: Mapped[int] = mapped_column(primary_key=True)
+    path: Mapped[str] = mapped_column(nullable=False)
+    date: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     _text_obj = relationship(
         'DocumentText',
@@ -23,9 +25,9 @@ class Document(Base):
 class DocumentText(Base):
     __tablename__ = 'document_texts'
 
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    document_id = Column(Integer, ForeignKey('documents.id'), nullable=False)
-    text = Column(Text, nullable=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    document_id: Mapped[int] = mapped_column(ForeignKey('documents.id'), nullable=False)
+    text: Mapped[Optional[str]] = mapped_column(nullable=True)
 
     document = relationship('Document', back_populates='_text_obj')
 

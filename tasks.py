@@ -17,3 +17,4 @@ def analyse_doc(doc_id: int, path: str):
         print(f'Ошибка: {e}')
     finally:
         db.close()
+

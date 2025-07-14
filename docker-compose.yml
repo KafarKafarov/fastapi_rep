@@ -5,12 +5,14 @@ services:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
     ports:
-      - "15672:15672"
-    networks: [appnet]
+       - "15672:15672"
+    networks:
+      - appnet
 
   redis:
     image: redis:7-alpine
-    networks: [appnet]
+    networks:
+      - appnet
 
   db:
     image: postgres:15
@@ -20,33 +22,48 @@ services:
       POSTGRES_DB: fastapi_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks: [appnet]
+    networks:
+      - appnet
 
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: fastapi-ocr
-    depends_on: [rabbitmq, redis, db]
-    env_file: [.env]
+    depends_on:
+      - rabbitmq
+      - redis
+      - db
+    env_file:
+      - .env
     volumes:
       - .:/app
     ports:
       - "8000:8000"
     command: uvicorn main:app --host 0.0.0.0 --port 8000
-    networks: [appnet]
+    networks:
+      - appnet
 
   worker:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: celery-worker
-    depends_on: [rabbitmq, redis, db]
-    env_file: [.env]
+    depends_on:
+      - rabbitmq
+      - redis
+      - db
+    env_file:
+      - .env
     volumes:
       - .:/app
     command: celery -A celery_worker.celery_app worker --loglevel=info -Q analysis
-    networks: [appnet]
+    networks:
+      - appnet
 
 volumes:
   postgres_data:
 
 networks:
   appnet:
-    driver: bridge
+    external: true
