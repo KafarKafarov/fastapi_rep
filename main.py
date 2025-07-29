@@ -129,6 +129,6 @@ def doc_analyse(doc_id: int, db: Session = Depends(get_db)):
     analyse_doc.delay(db_doc.id, db_doc.path)
     return {'status': 200, 'msg': 'Анализ запущен'}
 
-@app.get('/health', summary='Health check', tags=['Сервис'])
+@app.get('/health_check', summary='Проверка работы', tags=['Сервис проверки'])
 def health_check():
-    return {"status": True, "note": "git binding successful"}
+    return {"status": True, "service": "fastapi_ocr", "version": "1.0"}
